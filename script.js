@@ -3,7 +3,7 @@ function parse() {
   const errorMsg = document.getElementById("error-msg");
   const rawDelay = dpInput.value.trim();
   const MAX_800_TURN_TIME = 40;
-  const MAX_700_TURN_TIME = 35;
+  const MAX_700_TURN_TIME = 30;
 
   if (rawDelay === "" || !/^\d+$/.test(rawDelay)) {
     dpInput.classList.add("error");
@@ -61,7 +61,9 @@ function parse() {
 
   const actualDeparture = result.brakesReleased?.mins;
   const schedDeparture = actualDeparture - delayMins;
-  const schedBoarding = schedDeparture - 30;
+  const is700 = document.getElementById("aircraft_700").checked;
+  const maxTurnTime = is700 ? MAX_700_TURN_TIME : MAX_800_TURN_TIME;
+  const schedBoarding = schedDeparture - maxTurnTime;
   const actualBoarding = result.paxBoardingStarted?.mins;
 
   const combinedBar = document.getElementById("combined-bar");

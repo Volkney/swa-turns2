@@ -388,3 +388,14 @@ button:active {
     border-color: var(--text-muted);
     background: transparent;
 }
+
+fieldset {
+    border: none;
+    color: var(--text-muted);
+    padding: 10px 10px 10px 0px;
+}
+
+.fieldset_child_container {
+    display: flex;
+    gap: 10px;
+}
