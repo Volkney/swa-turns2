@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <link type="text/css" rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <!doctype html>
+        <html lang="en">
+            <head>
+                <meta charset="UTF-8" />
+                <meta
+                    name="viewport"
+                    content="width=device-width, initial-scale=1.0"
+                />
+                <title>Turn Time Analyzer</title>
+                <link rel="icon" type="image/x-icon" href="aleph.svg" />
+                <link rel="stylesheet" href="stylo.css" />
+                <script src="script.js" defer></script>
+            </head>
+            <body>
+                <main class="app">
+                    <div class="top-row">
+                        <div class="textarea-col">
+                            <label for="turn-times">Turn times</label
+                            ><textarea
+                                id="turn-times"
+                                placeholder="Paste turn time data here…"
+                            ></textarea>
+                        </div>
+                        <div class="side-panel">
+                            <div class="delay-row">
+                                <label for="dp-time">Delay minutes</label
+                                ><input
+                                    type="text"
+                                    id="dp-time"
+                                    placeholder="e.g. 15"
+                                    inputmode="numeric"
+                                />
+                                <div class="error-msg" id="error-msg"></div>
+                            </div>
+                            <div class="summary-card" id="summary-card">
+                                <div class="summary-header">
+                                    <span></span><span>Sched</span
+                                    ><span>Actual</span>
+                                </div>
+                                <div
+                                    class="summary-row"
+                                    id="row-departure"
+                                ></div>
+                                <div
+                                    class="summary-row"
+                                    id="row-boarding"
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+                    <section><button id="boton">Parse</button></section>
+                    <div class="progress-container">
+                        <div class="marker-header" id="marker-header"></div>
+                        <div class="combined-bar" id="combined-bar"></div>
+                        <div class="labels-bar" id="labels-bar"></div>
+                        <button id="copy-btn"></button>
+                    </div>
+                </main>
+            </body>
+        </html>
+        <script type="module" src="script.js"></script>
+    </body>
+</html>
