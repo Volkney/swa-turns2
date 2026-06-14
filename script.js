@@ -86,7 +86,12 @@ function parse() {
 
   const total = Object.values(durations).reduce((a, b) => a + b.mins, 0);
 
-  const actualDeparture = result.brakesReleased.mins;
+  const pushbackDiff = result.brakesReleased.mins - result.doorsClosed.mins;
+  const actualDeparture =
+    pushbackDiff >= 2 ? result.doorsClosed.mins : result.brakesReleased.mins;
+  console.log(
+    `Departure source: ${pushbackDiff >= 2 ? "doorsClosed" : "brakesReleased"} (diff: ${pushbackDiff}m)`,
+  ); // this is used to see which time is used
   const schedDeparture = actualDeparture - delayMins;
   const schedBoarding = schedDeparture - BOARDING_TIME_MINUTES;
   const actualBoarding = result.paxBoardingStarted.mins;
