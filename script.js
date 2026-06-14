@@ -1,23 +1,35 @@
 function parse() {
   const dpInput = document.getElementById("dp-time");
   const errorMsg = document.getElementById("error-msg");
+  const textareaErrorMsg = document.getElementById("textarea-error-msg");
+  const textarea = document.getElementById("turn-times");
   const rawDelay = dpInput.value.trim();
-  const MAX_800_TURN_TIME = 40;
-  const MAX_700_TURN_TIME = 30;
+  const BOARDING_TIME_MINUTES = 30;
 
+  // Reset errors
+  errorMsg.textContent = "";
+  textareaErrorMsg.textContent = "";
+  dpInput.classList.remove("error");
+  textarea.classList.remove("error");
+
+  // Validate delay input
   if (rawDelay === "" || !/^\d+$/.test(rawDelay)) {
     dpInput.classList.add("error");
     errorMsg.textContent = rawDelay === "" ? "Required" : "Must be a number";
     dpInput.focus();
     return;
   }
-  dpInput.classList.remove("error");
-  errorMsg.textContent = "";
+
+  // Validate textarea not empty
+  if (textarea.value.trim() === "") {
+    textarea.classList.add("error");
+    textareaErrorMsg.textContent = "Paste turn time data first";
+    return;
+  }
 
   const delayMins = parseInt(rawDelay);
-  const lines = document
-    .getElementById("turn-times")
-    .value.split("\n")
+  const lines = textarea.value
+    .split("\n")
     .map((l) => l.trim())
     .filter((l) => l !== "");
 
@@ -33,43 +45,55 @@ function parse() {
     }
   }
 
+  // Validate required fields are present
+  const required = [
+    "paxDeboardingStarted",
+    "paxBoardingStarted",
+    "paxBoardingEnded",
+    "pwbSent",
+    "doorsClosed",
+    "brakesReleased",
+  ];
+  const missing = required.filter((k) => !result[k]);
+  if (missing.length > 0) {
+    textarea.classList.add("error");
+    textareaErrorMsg.textContent = "Missing events — check data format";
+    return;
+  }
+
   const durations = {
     deboarding: {
-      mins: safeDiff(result.paxBoardingStarted, result.paxDeboardingStarted),
-      from: result.paxDeboardingStarted?.raw,
-      to: result.paxBoardingStarted?.raw,
+      mins: result.paxBoardingStarted.mins - result.paxDeboardingStarted.mins,
+      from: result.paxDeboardingStarted.raw,
+      to: result.paxBoardingStarted.raw,
     },
     boarding: {
-      mins: result.paxBoardingEnded?.mins - result.paxBoardingStarted?.mins,
-      from: result.paxBoardingStarted?.raw,
-      to: result.paxBoardingEnded?.raw,
+      mins: result.paxBoardingEnded.mins - result.paxBoardingStarted.mins,
+      from: result.paxBoardingStarted.raw,
+      to: result.paxBoardingEnded.raw,
     },
     scanToPWB: {
-      mins: result.pwbSent?.mins - result.paxBoardingEnded?.mins,
-      from: result.paxBoardingEnded?.raw,
-      to: result.pwbSent?.raw,
+      mins: result.pwbSent.mins - result.paxBoardingEnded.mins,
+      from: result.paxBoardingEnded.raw,
+      to: result.pwbSent.raw,
     },
     pwbToDoors: {
-      mins: result.doorsClosed?.mins - result.pwbSent?.mins,
-      from: result.pwbSent?.raw,
-      to: result.doorsClosed?.raw,
+      mins: result.doorsClosed.mins - result.pwbSent.mins,
+      from: result.pwbSent.raw,
+      to: result.doorsClosed.raw,
     },
   };
 
   const total = Object.values(durations).reduce((a, b) => a + b.mins, 0);
-  const timelineStart = result.paxDeboardingStarted?.mins;
 
-  const actualDeparture = result.brakesReleased?.mins;
+  const actualDeparture = result.brakesReleased.mins;
   const schedDeparture = actualDeparture - delayMins;
-  const is700 = document.getElementById("aircraft_700").checked;
-  const maxTurnTime = is700 ? MAX_700_TURN_TIME : MAX_800_TURN_TIME;
-  const schedBoarding = schedDeparture - maxTurnTime;
-  const actualBoarding = result.paxBoardingStarted?.mins;
+  const schedBoarding = schedDeparture - BOARDING_TIME_MINUTES;
+  const actualBoarding = result.paxBoardingStarted.mins;
 
   const combinedBar = document.getElementById("combined-bar");
   const labelsBar = document.getElementById("labels-bar");
-  const markerHeader = document.getElementById("marker-header");
-  combinedBar.innerHTML = labelsBar.innerHTML = markerHeader.innerHTML = "";
+  combinedBar.innerHTML = labelsBar.innerHTML = "";
 
   const labelMap = {
     deboarding: "Deboarding",
@@ -93,32 +117,6 @@ function parse() {
     labelsBar.appendChild(lbl);
   }
 
-  const markers = [
-    {
-      time: schedBoarding,
-      label: "Boarding",
-      cls: "marker-boarding",
-    },
-    {
-      time: schedDeparture,
-      label: "Departure",
-      cls: "marker-departure",
-    },
-  ];
-  for (const m of markers) {
-    const pct = ((m.time - timelineStart) / total) * 100;
-    if (pct < 0 || pct > 100) continue;
-    const pin = document.createElement("div");
-    pin.className = `marker-pin ${m.cls}`;
-    pin.style.left = `${pct}%`;
-    pin.innerHTML = `<div class="pin-label">${m.label}</div><div class="pin-time">${minsToTime(m.time)}</div>`;
-    markerHeader.appendChild(pin);
-    const line = document.createElement("div");
-    line.className = `bar-line ${m.cls}`;
-    line.style.left = `${pct}%`;
-    combinedBar.appendChild(line);
-  }
-
   function diffLabel(actualM, schedM) {
     const d = actualM - schedM;
     if (d === 0) return `<span class="diff-ok">On time</span>`;
@@ -140,7 +138,7 @@ function parse() {
     <div class="row-actual">${minsToTime(actualBoarding)}<div class="row-diff">${diffLabel(actualBoarding, schedBoarding)}</div></div>
   `;
 
-  const copyText = `FS ${result.paxBoardingStarted?.raw} LS ${result.paxBoardingEnded?.raw} PWB ${result.pwbSent?.raw}`;
+  const copyText = `FS ${result.paxBoardingStarted.raw} LS ${result.paxBoardingEnded.raw} PWB ${result.pwbSent.raw}`;
   const copyBtn = document.getElementById("copy-btn");
   copyBtn.classList.add("visible");
   copyBtn.textContent = `Copy  ·  ${copyText}`;
@@ -165,6 +163,11 @@ document.getElementById("dp-time").addEventListener("input", function () {
   document.getElementById("error-msg").textContent = "";
 });
 
+document.getElementById("turn-times").addEventListener("input", function () {
+  this.classList.remove("error");
+  document.getElementById("textarea-error-msg").textContent = "";
+});
+
 function formatKey(str) {
   return str
     .toLowerCase()
@@ -183,8 +186,4 @@ function minsToTime(mins) {
   const h = Math.floor(mins / 60) % 24,
     m = mins % 60;
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-}
-
-function safeDiff(a, b) {
-  return !a || !b ? 0 : a.mins - b.mins;
 }
