@@ -1,0 +1,19 @@
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    path {
+      fill: black;
+    }
+    @media (prefers-color-scheme: dark) {
+      path {
+        fill: white;
+      }
+    }
+  </style>
+<line x1="17.6471" y1="12.4412" x2="18.8235" y2="12.4412" stroke="white"/>
+<path d="M16.4706 3.20856L20 0L19.9895 7.53255L16.481 11.7647L16.4706 3.20856Z" fill="#2B2B2B"/>
+<path d="M7.70044 15.3312L10.6051 11.8157L3.82584 11.7935L4.30339e-05 15.2836L7.70044 15.3312Z" fill="#2B2B2B"/>
+<path d="M10.5882 4.70588H14.1176V15.2941H10.5882V4.70588Z" fill="#2B2B2B"/>
+<rect x="10.5882" y="11.7647" width="9.41176" height="3.52941" fill="#2B2B2B"/>
+<path d="M15.2941 11.7647H20V20L18.5882 17.4265L15.2941 11.7647Z" fill="#2B2B2B"/>
+<path d="M10.5882 3.52941H14.1176V7.05882H7.05882L10.5882 3.52941Z" fill="#2B2B2B"/>
+</svg>
